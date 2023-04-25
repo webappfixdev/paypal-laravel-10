@@ -153,4 +153,38 @@ class AddMoneyController extends Controller
         Session::forget('paypal_payment_id');
         return Redirect::route('addmoney.paywithpaypal');
     }
+    
+    public function refund($tran_id)
+    {
+        $paypal_conf = \Config::get('paypal');
+
+        $paymentPayment = new Payment();
+        $paymentInfo = $paymentPayment->get($tran_id,$this->_api_context);
+
+        $transaction = $paymentInfo->getTransactions();
+
+        if(empty($transaction[0])){
+            return false;
+        }
+
+        $relatedResource = $transaction[0]->getRelatedResources();
+        if (empty($relatedResource[0])) {
+            return false;
+        }
+
+        $sale = $relatedResource[0]->getSale();
+
+        $refund = new Refund();
+        $amt = (new Amount())->setTotal(10)->setCurrency('USD');
+        $refund->setAmount($amt);
+        $refund->setReason('Sale refund');
+
+        $refundSuccess  = $sale->refund($refund,$this->_api_context);
+
+        if ($refundSuccess->getState() == 'approved') {
+            \Session::put('success','Refund Success');
+            return Redirect::route('addmoney.paywithpaypal');
+        }
+        dd($refundSuccess);
+    }
 }
