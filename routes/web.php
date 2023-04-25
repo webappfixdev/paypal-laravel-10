@@ -21,4 +21,5 @@ Route::get('/', function () {
 Route::get('paywithpaypal', [AddMoneyController::class,'payWithPaypal'])->name('addmoney.paywithpaypal');
 Route::post('paypal', [AddMoneyController::class,'postPaymentWithpaypal'])->name('addmoney.paypal');
 Route::get('paypal', [AddMoneyController::class,'getPaymentStatus'])->name('payment.status');
+Route::get('refund/{trns_id}', [AddMoneyController::class,'refund'])->name('payment.refund');
 
